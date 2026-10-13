@@ -1,0 +1,8 @@
+<h1>LabelFlow</h1>
+
+{% if current_user.is_authenticated %}
+  <p>Hello {{ current_user.username }} (role: {{ current_user.role }})</p>
+  <p><a href="/logout">Logout</a></p>
+{% else %}
+  <p><a href="/login">Login</a> | <a href="/register">Register</a></p>
+{% endif %}

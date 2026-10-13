@@ -1,0 +1,13 @@
+<h2>Login</h2>
+
+{% for message in get_flashed_messages() %}
+  <p style="color:red">{{ message }}</p>
+{% endfor %}
+
+<form method="POST">
+  <p>Username: <input name="username" required></p>
+  <p>Password: <input name="password" type="password" required></p>
+  <button type="submit">Login</button>
+</form>
+
+<p><a href="/register">Create an account</a></p>
