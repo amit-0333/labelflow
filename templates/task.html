@@ -1,0 +1,9 @@
+{% if task %}
+  <h2>Your task (id {{ task.id }})</h2>
+  <p>{{ task.text }}</p>
+  <p style="color:gray">Labeling buttons come in Phase 7.</p>
+{% else %}
+  <h2>No tasks left for you</h2>
+{% endif %}
+
+<p><a href="/project/{{ project_id }}">Back to project</a></p>

@@ -18,5 +18,7 @@
     <button type="submit">Upload</button>
   </form>
 {% endif %}
-
+{% if current_user.role in ["admin", "annotator"] %}
+  <p><a href="/start_labeling/{{ project.id }}"><button>Start labeling</button></a></p>
+{% endif %}
 <p><a href="/projects">Back to projects</a></p>
