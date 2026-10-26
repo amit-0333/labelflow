@@ -17,6 +17,8 @@ def create_app():
     from core import models
     from auth.routes import auth_bp
     app.register_blueprint(auth_bp)
+    from projects.routes import projects_bp
+    app.register_blueprint(projects_bp)
 
     with app.app_context():
         db.create_all()

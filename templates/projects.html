@@ -1,0 +1,22 @@
+<h2>Projects</h2>
+
+{% if current_user.role == "admin" %}
+  <p><a href="/create_project">+ Create new project</a></p>
+{% endif %}
+
+<table border="1" cellpadding="6">
+  <tr>
+    <th>Name</th>
+    <th>Labels</th>
+    <th>Annotators per item</th>
+  </tr>
+  {% for p in projects %}
+  <tr>
+    <td>{{ p.name }}</td>
+    <td>{{ p.label_options | join(", ") }}</td>
+    <td>{{ p.annotators_per_item }}</td>
+  </tr>
+  {% endfor %}
+</table>
+
+<p><a href="/">Back to home</a></p>

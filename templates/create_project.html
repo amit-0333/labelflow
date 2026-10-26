@@ -1,0 +1,21 @@
+<h2>Create Project</h2>
+
+{% if message %}
+  <p style="color:red">{{ message }}</p>
+{% endif %}
+
+<form action="/perform_create_project" method="POST">
+  <p>Name: <input name="name" required></p>
+  <p>Description: <br><textarea name="description" rows="3" cols="50"></textarea></p>
+  <p>Guidelines: <br><textarea name="guidelines" rows="5" cols="50"></textarea></p>
+  <p>Labels (separate with commas): <input name="labels" placeholder="spam, not_spam" required></p>
+  <p>Annotators per item:
+    <select name="annotators_per_item">
+      <option value="2">2</option>
+      <option value="3">3</option>
+    </select>
+  </p>
+  <button type="submit">Create</button>
+</form>
+
+<p><a href="/projects">Back to projects</a></p>
