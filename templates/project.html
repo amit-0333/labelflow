@@ -1,0 +1,22 @@
+<h2>{{ project.name }}</h2>
+
+{% if message %}
+  <p style="color:green">{{ message }}</p>
+{% endif %}
+
+<p><b>Description:</b> {{ project.description }}</p>
+<p><b>Guidelines:</b> {{ project.guidelines }}</p>
+<p><b>Labels:</b> {{ project.label_options | join(", ") }}</p>
+<p><b>Annotators per item:</b> {{ project.annotators_per_item }}</p>
+<p><b>Total tasks:</b> {{ task_count }}</p>
+
+{% if current_user.role == "admin" %}
+  <h3>Upload CSV</h3>
+  <p>The file must have a column named <b>text</b>.</p>
+  <form action="/perform_upload_csv/{{ project.id }}" method="POST" enctype="multipart/form-data">
+    <input type="file" name="file" accept=".csv">
+    <button type="submit">Upload</button>
+  </form>
+{% endif %}
+
+<p><a href="/projects">Back to projects</a></p>

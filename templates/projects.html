@@ -12,7 +12,7 @@
   </tr>
   {% for p in projects %}
   <tr>
-    <td>{{ p.name }}</td>
+    <td><a href="/project/{{ p.id }}">{{ p.name }}</a></td>
     <td>{{ p.label_options | join(", ") }}</td>
     <td>{{ p.annotators_per_item }}</td>
   </tr>

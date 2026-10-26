@@ -1,8 +1,9 @@
 from flask import Blueprint, render_template, request, redirect
 from flask_login import current_user
 from core.db import db
-from core.models import Project
+from core.models import Project, Task
 from auth.decorators import role_required
+from projects.csv_parser import parse_csv
 
 projects_bp = Blueprint("projects", __name__)
 
@@ -55,3 +56,39 @@ def perform_create_project():
     db.session.commit()
 
     return redirect('/projects')
+
+
+## show one project: details, task count, upload form
+@projects_bp.route('/project/<int:project_id>')
+@role_required("admin", "annotator", "reviewer")
+def project_page(project_id):
+    project = Project.query.get_or_404(project_id)
+    task_count = Task.query.filter_by(project_id=project_id).count()
+    return render_template('project.html', project=project, task_count=task_count)
+
+
+## admin only: read the CSV and save each row as a task
+@projects_bp.route('/perform_upload_csv/<int:project_id>', methods=['POST'])
+@role_required("admin")
+def perform_upload_csv(project_id):
+    project = Project.query.get_or_404(project_id)
+    file = request.files.get('file')
+
+    ## no file chosen
+    if file is None or file.filename == '':
+        task_count = Task.query.filter_by(project_id=project_id).count()
+        return render_template('project.html', project=project, task_count=task_count, message="Choose a CSV file first")
+
+    tasks, error = parse_csv(file)
+
+    if error:
+        task_count = Task.query.filter_by(project_id=project_id).count()
+        return render_template('project.html', project=project, task_count=task_count, message=error)
+
+    for t in tasks:
+        task = Task(project_id=project_id, text=t["text"], extra_data=t["extra"])
+        db.session.add(task)
+    db.session.commit()
+
+    task_count = Task.query.filter_by(project_id=project_id).count()
+    return render_template('project.html', project=project, task_count=task_count, message=str(len(tasks)) + " tasks uploaded")
