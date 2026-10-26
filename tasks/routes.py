@@ -4,6 +4,7 @@ from core.db import db
 from core.models import Project, Task, Assignment, Annotation
 from auth.decorators import role_required
 from tasks.assignment import claim_next_task
+from tasks.review import check_task
 
 tasks_bp = Blueprint("tasks", __name__)
 
@@ -36,13 +37,15 @@ def perform_submit_label():
         return redirect('/start_labeling/' + str(project.id))
 
     annotation = Annotation(
-        task_id=task_id,
-        user_id=current_user.id,
-        label=label,
-        time_taken_ms=int(time_taken) if time_taken else None
+    task_id=task_id,
+    user_id=current_user.id,
+    label=label,
+    time_taken_ms=int(time_taken) if time_taken else None
     )
     db.session.add(annotation)
     assignment.status = "submitted"
     db.session.commit()
+
+    check_task(task_id)
 
     return redirect('/start_labeling/' + str(project.id))
