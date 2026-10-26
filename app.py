@@ -30,6 +30,8 @@ def create_app():
     app.register_blueprint(projects_bp)
     from tasks.routes import tasks_bp
     app.register_blueprint(tasks_bp)
+    from export.routes import export_bp
+    app.register_blueprint(export_bp)
 
     with app.app_context():
         db.create_all()

@@ -21,4 +21,11 @@
 {% if current_user.role in ["admin", "annotator"] %}
   <p><a href="/start_labeling/{{ project.id }}"><button>Start labeling</button></a></p>
 {% endif %}
+{% if current_user.role in ["admin", "reviewer"] %}
+  <h3>Export final labels</h3>
+  <p>
+    <a href="/export/{{ project.id }}/csv"><button>Download CSV</button></a>
+    <a href="/export/{{ project.id }}/jsonl"><button>Download JSONL</button></a>
+  </p>
+{% endif %}
 <p><a href="/projects">Back to projects</a></p>
