@@ -1,9 +1,43 @@
 {% if task %}
-  <h2>Your task (id {{ task.id }})</h2>
-  <p>{{ task.text }}</p>
-  <p style="color:gray">Labeling buttons come in Phase 7.</p>
+  <h2>{{ project.name }}</h2>
+  <p><b>Guidelines:</b> {{ project.guidelines }}</p>
+  <hr>
+
+  <h3 style="max-width:700px">{{ task.text }}</h3>
+
+  <form id="label_form" action="/perform_submit_label" method="POST">
+    <input type="hidden" name="task_id" value="{{ task.id }}">
+    <input type="hidden" name="time_taken_ms" id="time_taken_ms">
+
+    {% for label in project.label_options %}
+      <button type="submit" name="label" value="{{ label }}" id="btn{{ loop.index }}"
+              style="padding:12px 24px; font-size:18px; margin-right:8px">
+        {{ loop.index }}: {{ label }}
+      </button>
+    {% endfor %}
+  </form>
+
+  <p style="color:gray">Tip: press the number key to choose a label.</p>
+
+  <script>
+    // remember when the page opened, to measure how long the label took
+    var start = Date.now();
+
+    // before the form is sent, save the time taken
+    document.getElementById('label_form').addEventListener('submit', function () {
+      document.getElementById('time_taken_ms').value = Date.now() - start;
+    });
+
+    // pressing 1, 2, 3... clicks the matching button
+    document.addEventListener('keydown', function (e) {
+      var button = document.getElementById('btn' + e.key);
+      if (button) {
+        button.click();
+      }
+    });
+  </script>
 {% else %}
   <h2>No tasks left for you</h2>
 {% endif %}
 
-<p><a href="/project/{{ project_id }}">Back to project</a></p>
+<p><a href="/project/{{ project.id }}">Back to project</a></p>
