@@ -5,6 +5,10 @@
 
   <p><a href="/projects">Projects</a></p>
 
+  {% if current_user.role in ["admin", "reviewer"] %}
+    <p><a href="/review">Review queue</a></p>
+  {% endif %}
+
   {% if current_user.role == "admin" %}
     <p><a href="/admin/users">Manage users</a></p>
   {% endif %}

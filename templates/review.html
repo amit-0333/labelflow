@@ -1,0 +1,26 @@
+<h2>Review queue</h2>
+
+{% if items|length == 0 %}
+  <p>Nothing to review.</p>
+{% endif %}
+
+{% for item in items %}
+  <div style="border:1px solid gray; padding:12px; margin-bottom:12px; max-width:700px">
+    <h3>{{ item.task.text }}</h3>
+
+    <p>
+      {% for v in item.votes %}
+        <b>{{ v.username }}</b> said: {{ v.label }}<br>
+      {% endfor %}
+    </p>
+
+    <form action="/perform_review" method="POST">
+      <input type="hidden" name="task_id" value="{{ item.task.id }}">
+      {% for label in item.labels %}
+        <button type="submit" name="label" value="{{ label }}">{{ label }}</button>
+      {% endfor %}
+    </form>
+  </div>
+{% endfor %}
+
+<p><a href="/">Back to home</a></p>

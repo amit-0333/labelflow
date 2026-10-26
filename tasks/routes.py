@@ -5,6 +5,8 @@ from core.models import Project, Task, Assignment, Annotation
 from auth.decorators import role_required
 from tasks.assignment import claim_next_task
 from tasks.review import check_task
+from core.models import ReviewDecision, User
+
 
 tasks_bp = Blueprint("tasks", __name__)
 
@@ -49,3 +51,46 @@ def perform_submit_label():
     check_task(task_id)
 
     return redirect('/start_labeling/' + str(project.id))
+
+## reviewer or admin: show all tasks that need a decision
+@tasks_bp.route('/review')
+@role_required("admin", "reviewer")
+def review_queue():
+    tasks = Task.query.filter_by(status="needs_review").all()
+
+    ## for each task, collect who gave which label
+    items = []
+    for t in tasks:
+        project = Project.query.get(t.project_id)
+        votes = []
+        for a in Annotation.query.filter_by(task_id=t.id).all():
+            user = User.query.get(a.user_id)
+            votes.append({"username": user.username, "label": a.label})
+        items.append({"task": t, "labels": project.label_options, "votes": votes})
+
+    return render_template('review.html', items=items)
+
+
+## reviewer picks the final label, this decision is final
+@tasks_bp.route('/perform_review', methods=['POST'])
+@role_required("admin", "reviewer")
+def perform_review():
+    task_id = int(request.form.get('task_id'))
+    label = request.form.get('label')
+
+    task = Task.query.get_or_404(task_id)
+    project = Project.query.get(task.project_id)
+
+    ## only tasks waiting for review, and only a valid label
+    if task.status != "needs_review" or label not in project.label_options:
+        return redirect('/review')
+
+    decision = ReviewDecision(task_id=task_id, reviewer_id=current_user.id, label=label)
+    db.session.add(decision)
+
+    task.final_label = label
+    task.final_source = "reviewer"
+    task.status = "completed"
+    db.session.commit()
+
+    return redirect('/review')
