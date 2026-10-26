@@ -1,10 +1,10 @@
 <h2>Register</h2>
 
-{% for message in get_flashed_messages() %}
+{% if message %}
   <p style="color:red">{{ message }}</p>
-{% endfor %}
+{% endif %}
 
-<form method="POST">
+<form action="/perform_registration" method="POST">
   <p>Username: <input name="username" required></p>
   <p>Email: <input name="email" type="email" required></p>
   <p>Password: <input name="password" type="password" required></p>
