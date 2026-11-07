@@ -1,0 +1,22 @@
+<h2>Annotator quality</h2>
+
+<table border="1" cellpadding="6">
+  <tr>
+    <th>Annotator</th>
+    <th>Labels</th>
+    <th>Gold correct</th>
+    <th>Too fast (&lt;1s)</th>
+    <th>Weight</th>
+  </tr>
+  {% for r in rows %}
+  <tr>
+    <td>{{ r.username }}</td>
+    <td>{{ r.total }}</td>
+    <td>{{ r.gold_correct }} / {{ r.gold_total }}</td>
+    <td>{{ r.fast }}</td>
+    <td>{{ r.weight }}</td>
+  </tr>
+  {% endfor %}
+</table>
+
+<p><a href="/">Back to home</a></p>

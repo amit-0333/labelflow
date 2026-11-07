@@ -32,6 +32,8 @@ def create_app():
     app.register_blueprint(tasks_bp)
     from export.routes import export_bp
     app.register_blueprint(export_bp)
+    from quality.routes import quality_bp
+    app.register_blueprint(quality_bp)
 
     with app.app_context():
         db.create_all()
