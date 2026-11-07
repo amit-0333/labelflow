@@ -92,8 +92,20 @@ def perform_upload_csv(project_id):
         task_count = Task.query.filter_by(project_id=project_id).count()
         return render_template('project.html', project=project, task_count=task_count, message=error)
 
+        ## a gold_label must be one of the project labels
     for t in tasks:
-        task = Task(project_id=project_id, text=t["text"], extra_data=t["extra"])
+        if t["gold_label"] and t["gold_label"] not in project.label_options:
+            task_count = Task.query.filter_by(project_id=project_id).count()
+            return render_template('project.html', project=project, task_count=task_count, message="gold_label '" + t["gold_label"] + "' is not one of the project labels")
+
+    for t in tasks:
+        task = Task(
+            project_id=project_id,
+            text=t["text"],
+            extra_data=t["extra"],
+            is_gold=bool(t["gold_label"]),
+            gold_label=t["gold_label"]
+        )
         db.session.add(task)
     db.session.commit()
 

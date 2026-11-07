@@ -7,6 +7,10 @@ def check_task(task_id):
     task = Task.query.get(task_id)
     project = Project.query.get(task.project_id)
 
+     ## gold questions are only for checking annotators, never for consensus or review
+    if task.is_gold:
+        return
+
     ## the reviewer already decided, never change it
     if task.final_source == "reviewer":
         return
