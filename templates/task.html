@@ -3,7 +3,18 @@
   <p><b>Guidelines:</b> {{ project.guidelines }}</p>
   <hr>
 
-  <h3 style="max-width:700px">{{ task.text }}</h3>
+  {% if project.task_type == "pairwise" %}
+    <h3 style="max-width:700px">Prompt: {{ task.text }}</h3>
+    <div style="display:flex; gap:16px; max-width:900px">
+      <div style="flex:1; border:1px solid gray; padding:12px"><b>Answer A</b><p>{{ task.extra_data.answer_a }}</p></div>
+      <div style="flex:1; border:1px solid gray; padding:12px"><b>Answer B</b><p>{{ task.extra_data.answer_b }}</p></div>
+    </div>
+  {% elif project.task_type == "rating" %}
+    <h3 style="max-width:700px">Prompt: {{ task.text }}</h3>
+    <div style="border:1px solid gray; padding:12px; max-width:700px"><b>Answer</b><p>{{ task.extra_data.answer }}</p></div>
+  {% else %}
+    <h3 style="max-width:700px">{{ task.text }}</h3>
+  {% endif %}
 
   {% if prediction %}
     <p style="color:#555">AI suggests: <b>{{ prediction.label }}</b> ({{ (prediction.confidence * 100) | round | int }}% sure)</p>
@@ -24,15 +35,12 @@
   <p style="color:gray">Tip: press the number key to choose a label.</p>
 
   <script>
-    // remember when the page opened, to measure how long the label took
     var start = Date.now();
 
-    // before the form is sent, save the time taken
     document.getElementById('label_form').addEventListener('submit', function () {
       document.getElementById('time_taken_ms').value = Date.now() - start;
     });
 
-    // pressing 1, 2, 3... clicks the matching button
     document.addEventListener('keydown', function (e) {
       var button = document.getElementById('btn' + e.key);
       if (button) {

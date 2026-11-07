@@ -30,24 +30,30 @@ def create_project():
 @role_required("admin")
 def perform_create_project():
     name = request.form.get('name')
+    task_type = request.form.get('task_type')
     description = request.form.get('description')
     guidelines = request.form.get('guidelines')
-    labels_text = request.form.get('labels')
+    labels_text = request.form.get('labels') or ''
     annotators_per_item = request.form.get('annotators_per_item')
 
-    ## "spam, not_spam" becomes ["spam", "not_spam"]
-    label_options = []
-    for label in labels_text.split(','):
-        label = label.strip()
-        if label != '':
-            label_options.append(label)
-
-    ## need at least 2 labels
-    if len(label_options) < 2:
-        return render_template('create_project.html', message="Enter at least 2 labels, separated by commas")
+    ## labels are fixed for pairwise and rating
+    if task_type == "pairwise":
+        label_options = ["A", "B"]
+    elif task_type == "rating":
+        label_options = ["1", "2", "3", "4", "5"]
+    else:
+        task_type = "classification"
+        label_options = []
+        for label in labels_text.split(','):
+            label = label.strip()
+            if label != '':
+                label_options.append(label)
+        if len(label_options) < 2:
+            return render_template('create_project.html', message="Enter at least 2 labels, separated by commas")
 
     project = Project(
         name=name,
+        task_type=task_type,
         description=description,
         guidelines=guidelines,
         label_options=label_options,
@@ -86,7 +92,7 @@ def perform_upload_csv(project_id):
         task_count = Task.query.filter_by(project_id=project_id).count()
         return render_template('project.html', project=project, task_count=task_count, message="Choose a CSV file first")
 
-    tasks, error = parse_csv(file)
+    tasks, error = parse_csv(file, project.task_type)
 
     if error:
         task_count = Task.query.filter_by(project_id=project_id).count()

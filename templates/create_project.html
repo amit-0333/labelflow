@@ -6,9 +6,16 @@
 
 <form action="/perform_create_project" method="POST">
   <p>Name: <input name="name" required></p>
+  <p>Type:
+    <select name="task_type">
+      <option value="classification">Text classification</option>
+      <option value="pairwise">Pairwise: which answer is better, A or B</option>
+      <option value="rating">Rating: 1 to 5</option>
+    </select>
+  </p>
   <p>Description: <br><textarea name="description" rows="3" cols="50"></textarea></p>
   <p>Guidelines: <br><textarea name="guidelines" rows="5" cols="50"></textarea></p>
-  <p>Labels (separate with commas): <input name="labels" placeholder="spam, not_spam" required></p>
+  <p>Labels (classification only, separate with commas): <input name="labels" placeholder="spam, not_spam"></p>
   <p>Annotators per item:
     <select name="annotators_per_item">
       <option value="2">2</option>

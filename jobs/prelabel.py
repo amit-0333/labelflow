@@ -5,6 +5,18 @@ from core.models import Project, Task, AIPrediction
 from llm.groq_client import prelabel
 
 
+## builds the text sent to Groq, depending on the project type
+def build_text(task, project):
+    extra = task.extra_data or {}
+    if project.task_type == "pairwise":
+        return ("Which answer is better for the prompt?\nPrompt: " + task.text
+                + "\nAnswer A: " + str(extra.get("answer_a"))
+                + "\nAnswer B: " + str(extra.get("answer_b")))
+    if project.task_type == "rating":
+        return ("Rate the answer quality from 1 (bad) to 5 (excellent).\nPrompt: " + task.text
+                + "\nAnswer: " + str(extra.get("answer")))
+    return task.text
+
 ## runs in the worker: asks Groq for every task that has no AI label yet
 def prelabel_project(project_id):
     with app.app_context():
@@ -21,7 +33,7 @@ def prelabel_project(project_id):
 
         saved = 0
         for t in tasks:
-            result = prelabel(t.text, project.label_options)
+            result = prelabel(build_text(t, project), project.label_options)
             if result:
                 db.session.add(AIPrediction(
                     task_id=t.id,
