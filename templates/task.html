@@ -5,6 +5,10 @@
 
   <h3 style="max-width:700px">{{ task.text }}</h3>
 
+  {% if prediction %}
+    <p style="color:#555">AI suggests: <b>{{ prediction.label }}</b> ({{ (prediction.confidence * 100) | round | int }}% sure)</p>
+  {% endif %}
+
   <form id="label_form" action="/perform_submit_label" method="POST">
     <input type="hidden" name="task_id" value="{{ task.id }}">
     <input type="hidden" name="time_taken_ms" id="time_taken_ms">

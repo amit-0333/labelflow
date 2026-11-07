@@ -6,6 +6,7 @@ from auth.decorators import role_required
 from tasks.assignment import claim_next_task
 from tasks.review import check_task
 from core.models import ReviewDecision, User
+from core.models import AIPrediction
 
 
 tasks_bp = Blueprint("tasks", __name__)
@@ -17,7 +18,13 @@ tasks_bp = Blueprint("tasks", __name__)
 def start_labeling(project_id):
     project = Project.query.get_or_404(project_id)
     task = claim_next_task(current_user.id, project_id)
-    return render_template('task.html', task=task, project=project)
+
+    ## the AI suggestion for this task, if there is one
+    prediction = None
+    if task:
+        prediction = AIPrediction.query.filter_by(task_id=task.id).order_by(AIPrediction.id.desc()).first()
+
+    return render_template('task.html', task=task, project=project, prediction=prediction)
 
 ## save the label, mark the assignment as done, then go to the next task
 @tasks_bp.route('/perform_submit_label', methods=['POST'])
