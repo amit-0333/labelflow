@@ -94,3 +94,12 @@ def perform_role_change():
 
     users = User.query.all()
     return render_template('manage_users.html', users=users, message="Role updated")
+
+## admin only: turn the AI suggestion on or off for one annotator
+@auth_bp.route('/perform_toggle_ai/<int:user_id>', methods=['POST'])
+@role_required("admin")
+def perform_toggle_ai(user_id):
+    user = User.query.get_or_404(user_id)
+    user.see_ai = not user.see_ai
+    db.session.commit()
+    return redirect('/admin/users')

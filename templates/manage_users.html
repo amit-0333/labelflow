@@ -9,6 +9,7 @@
     <th>Username</th>
     <th>Email</th>
     <th>Role</th>
+    <th>Sees AI</th>
     <th>Change role</th>
   </tr>
   {% for u in users %}
@@ -16,6 +17,12 @@
     <td>{{ u.username }}</td>
     <td>{{ u.email }}</td>
     <td>{{ u.role }}</td>
+    <td>
+      {{ "yes" if u.see_ai else "no" }}
+      <form action="/perform_toggle_ai/{{ u.id }}" method="POST" style="display:inline">
+        <button type="submit">Toggle</button>
+      </form>
+    </td>
     <td>
       <form action="/perform_role_change" method="POST">
         <input type="hidden" name="user_id" value="{{ u.id }}">

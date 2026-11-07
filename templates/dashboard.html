@@ -1,0 +1,27 @@
+<h2>Dashboard: {{ project.name }}</h2>
+
+<h3>Progress</h3>
+<p>Tasks: {{ s.total }} | Completed: {{ s.status.completed }} | Needs review: {{ s.status.needs_review }} | In progress: {{ s.status.in_progress }} | Pending: {{ s.status.pending }}</p>
+<p>Human labels collected: {{ s.labels }}</p>
+
+<h3>AI pre-labeling</h3>
+<p>Acceptance rate:
+  {% if s.acceptance is none %}n/a (no labels with a suggestion yet){% else %}<b>{{ s.acceptance }}%</b> of {{ s.shown }} labels{% endif %}
+</p>
+<p>Average time per label with AI suggestion:
+  {% if s.avg_with is none %}n/a{% else %}<b>{{ s.avg_with }}s</b> ({{ s.n_with }} labels){% endif %}
+</p>
+<p>Average time per label without AI suggestion:
+  {% if s.avg_without is none %}n/a{% else %}<b>{{ s.avg_without }}s</b> ({{ s.n_without }} labels){% endif %}
+</p>
+<p>Time saved:
+  {% if s.saved_pct is none %}n/a (needs labels from both groups){% else %}<b>{{ s.saved_pct }}%</b>{% endif %}
+</p>
+
+<h3>Quality checks</h3>
+<p>Wrong answers on gold questions: <b>{{ s.gold_wrong }}</b> of {{ s.gold_total }}</p>
+<p>Labels made too fast: <b>{{ s.too_fast }}</b></p>
+<p>Labels overruled by the reviewer: <b>{{ s.reviewer_fixed }}</b></p>
+
+<p><a href="/agreement/{{ project.id }}">Agreement and kappa</a> | <a href="/quality">Annotator scores</a></p>
+<p><a href="/project/{{ project.id }}">Back to project</a></p>

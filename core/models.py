@@ -9,6 +9,7 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
     role = db.Column(db.String(20), nullable=False, default="annotator")  # admin / annotator / reviewer
+    see_ai = db.Column(db.Boolean, nullable=False, default=True, server_default="1")
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 

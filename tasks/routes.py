@@ -18,7 +18,7 @@ def start_labeling(project_id):
 
     ## the AI suggestion for this task, if there is one
     prediction = None
-    if task and not task.is_gold:
+    if task and not task.is_gold and current_user.see_ai:
         prediction = AIPrediction.query.filter_by(task_id=task.id).order_by(AIPrediction.id.desc()).first()
 
     return render_template('task.html', task=task, project=project, prediction=prediction)
@@ -45,7 +45,7 @@ def perform_submit_label():
 
     ## did the annotator agree with the AI? (None if there was no AI suggestion)
     prediction = AIPrediction.query.filter_by(task_id=task_id).order_by(AIPrediction.id.desc()).first()
-    if prediction and not task.is_gold:
+    if prediction and not task.is_gold and current_user.see_ai:
         accepted_ai = (label == prediction.label)
     else:
         accepted_ai = None
