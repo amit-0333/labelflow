@@ -84,3 +84,15 @@ class ReviewDecision(db.Model):
     reviewer_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     label = db.Column(db.String(100), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class DatasetVersion(db.Model):
+    """A frozen copy of the final labels of a project."""
+    __tablename__ = "dataset_versions"
+    id = db.Column(db.Integer, primary_key=True)
+    project_id = db.Column(db.Integer, db.ForeignKey("projects.id"), nullable=False, index=True)
+    version_number = db.Column(db.Integer, nullable=False)
+    row_count = db.Column(db.Integer, default=0)
+    data = db.Column(db.JSON, nullable=False)  # list of rows
+    created_by = db.Column(db.Integer, db.ForeignKey("users.id"))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    __table_args__ = (db.UniqueConstraint("project_id", "version_number"),)

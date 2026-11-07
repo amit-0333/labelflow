@@ -1,0 +1,32 @@
+<h2>Dataset versions: {{ project.name }}</h2>
+
+<form action="/perform_create_version/{{ project.id }}" method="POST">
+  <button type="submit">Create new version (snapshot)</button>
+</form>
+<p style="color:gray">A version freezes all finished tasks and their final labels.</p>
+
+{% if versions|length == 0 %}
+  <p>No versions yet.</p>
+{% else %}
+  <table border="1" cellpadding="6">
+    <tr>
+      <th>Version</th>
+      <th>Rows</th>
+      <th>Created</th>
+      <th>Download</th>
+    </tr>
+    {% for v in versions %}
+    <tr>
+      <td>v{{ v.version_number }}</td>
+      <td>{{ v.row_count }}</td>
+      <td>{{ v.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+      <td>
+        <a href="/export_version/{{ v.id }}/csv">CSV</a> |
+        <a href="/export_version/{{ v.id }}/jsonl">JSONL</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+{% endif %}
+
+<p><a href="/project/{{ project.id }}">Back to project</a></p>

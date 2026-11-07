@@ -34,4 +34,7 @@
 {% if current_user.role in ["admin", "reviewer"] %}
   <p><a href="/agreement/{{ project.id }}"><button>Agreement dashboard</button></a></p>
 {% endif %}
+{% if current_user.role in ["admin", "reviewer"] %}
+  <p><a href="/versions/{{ project.id }}"><button>Dataset versions</button></a></p>
+{% endif %}
 <p><a href="/projects">Back to projects</a></p>
