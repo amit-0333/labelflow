@@ -1,13 +1,10 @@
 from flask import Blueprint, render_template, request, redirect
 from flask_login import current_user
 from core.db import db
-from core.models import Project, Task, Assignment, Annotation
+from core.models import Project, Task, Assignment, Annotation, AIPrediction, ReviewDecision, User
 from auth.decorators import role_required
 from tasks.assignment import claim_next_task
 from tasks.review import check_task
-from core.models import ReviewDecision, User
-from core.models import AIPrediction
-
 
 tasks_bp = Blueprint("tasks", __name__)
 
@@ -25,6 +22,7 @@ def start_labeling(project_id):
         prediction = AIPrediction.query.filter_by(task_id=task.id).order_by(AIPrediction.id.desc()).first()
 
     return render_template('task.html', task=task, project=project, prediction=prediction)
+
 
 ## save the label, mark the assignment as done, then go to the next task
 @tasks_bp.route('/perform_submit_label', methods=['POST'])
@@ -45,11 +43,19 @@ def perform_submit_label():
     if assignment is None or label not in project.label_options:
         return redirect('/start_labeling/' + str(project.id))
 
+    ## did the annotator agree with the AI? (None if there was no AI suggestion)
+    prediction = AIPrediction.query.filter_by(task_id=task_id).order_by(AIPrediction.id.desc()).first()
+    if prediction:
+        accepted_ai = (label == prediction.label)
+    else:
+        accepted_ai = None
+
     annotation = Annotation(
-    task_id=task_id,
-    user_id=current_user.id,
-    label=label,
-    time_taken_ms=int(time_taken) if time_taken else None
+        task_id=task_id,
+        user_id=current_user.id,
+        label=label,
+        time_taken_ms=int(time_taken) if time_taken else None,
+        accepted_ai=accepted_ai
     )
     db.session.add(annotation)
     assignment.status = "submitted"
@@ -58,6 +64,7 @@ def perform_submit_label():
     check_task(task_id)
 
     return redirect('/start_labeling/' + str(project.id))
+
 
 ## reviewer or admin: show all tasks that need a decision
 @tasks_bp.route('/review')
