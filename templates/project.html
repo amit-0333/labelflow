@@ -31,4 +31,7 @@
     <a href="/export/{{ project.id }}/jsonl"><button>Download JSONL</button></a>
   </p>
 {% endif %}
+{% if current_user.role in ["admin", "reviewer"] %}
+  <p><a href="/agreement/{{ project.id }}"><button>Agreement dashboard</button></a></p>
+{% endif %}
 <p><a href="/projects">Back to projects</a></p>

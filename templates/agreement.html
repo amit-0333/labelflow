@@ -1,0 +1,45 @@
+<h2>Agreement: {{ project.name }}</h2>
+
+<h3>Cohen's kappa</h3>
+<p style="color:gray">Above 0.8 is very strong, 0.6 to 0.8 good, 0.4 to 0.6 moderate, below 0.4 weak.</p>
+
+{% if pairs|length == 0 %}
+  <p>No labels yet.</p>
+{% else %}
+  <table border="1" cellpadding="6">
+    <tr>
+      <th>Pair</th>
+      <th>Tasks compared</th>
+      <th>Agree %</th>
+      <th>Kappa</th>
+    </tr>
+    {% for p in pairs %}
+    <tr>
+      <td>{{ p.a }} vs {{ p.b }}</td>
+      <td>{{ p.n }}</td>
+      <td>{{ p.agree }}%</td>
+      <td>{% if p.kappa is none %}n/a{% else %}{{ p.kappa }}{% endif %}</td>
+    </tr>
+    {% endfor %}
+  </table>
+{% endif %}
+
+<h3>Most confused labels</h3>
+{% if confused|length == 0 %}
+  <p>No disagreements yet.</p>
+{% else %}
+  <table border="1" cellpadding="6">
+    <tr>
+      <th>Labels</th>
+      <th>Times confused</th>
+    </tr>
+    {% for c in confused %}
+    <tr>
+      <td>{{ c[0][0] }} / {{ c[0][1] }}</td>
+      <td>{{ c[1] }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+{% endif %}
+
+<p><a href="/project/{{ project.id }}">Back to project</a></p>
