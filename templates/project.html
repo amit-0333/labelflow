@@ -9,6 +9,7 @@
 <p><b>Labels:</b> {{ project.label_options | join(", ") }}</p>
 <p><b>Annotators per item:</b> {{ project.annotators_per_item }}</p>
 <p><b>Total tasks:</b> {{ task_count }}</p>
+<p><b>AI pre-labeled:</b> {{ ai_count }}</p>
 
 {% if current_user.role == "admin" %}
   <h3>Upload CSV</h3>
@@ -17,6 +18,8 @@
     <input type="file" name="file" accept=".csv">
     <button type="submit">Upload</button>
   </form>
+
+  <p><a href="/perform_prelabel/{{ project.id }}"><button>Run AI pre-labeling</button></a></p>
 {% endif %}
 {% if current_user.role in ["admin", "annotator"] %}
   <p><a href="/start_labeling/{{ project.id }}"><button>Start labeling</button></a></p>

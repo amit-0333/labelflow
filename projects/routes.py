@@ -4,6 +4,8 @@ from core.db import db
 from core.models import Project, Task
 from auth.decorators import role_required
 from projects.csv_parser import parse_csv
+from core.models import AIPrediction
+from jobs.queue import queue
 
 projects_bp = Blueprint("projects", __name__)
 
@@ -58,13 +60,18 @@ def perform_create_project():
     return redirect('/projects')
 
 
-## show one project: details, task count, upload form
 @projects_bp.route('/project/<int:project_id>')
 @role_required("admin", "annotator", "reviewer")
 def project_page(project_id):
     project = Project.query.get_or_404(project_id)
     task_count = Task.query.filter_by(project_id=project_id).count()
-    return render_template('project.html', project=project, task_count=task_count)
+    ai_count = (
+        AIPrediction.query
+        .join(Task, AIPrediction.task_id == Task.id)
+        .filter(Task.project_id == project_id)
+        .count()
+    )
+    return render_template('project.html', project=project, task_count=task_count, ai_count=ai_count)
 
 
 ## admin only: read the CSV and save each row as a task
@@ -92,3 +99,12 @@ def perform_upload_csv(project_id):
 
     task_count = Task.query.filter_by(project_id=project_id).count()
     return render_template('project.html', project=project, task_count=task_count, message=str(len(tasks)) + " tasks uploaded")
+
+## admin only: send the pre-labeling job to the worker
+@projects_bp.route('/perform_prelabel/<int:project_id>')
+@role_required("admin")
+def perform_prelabel(project_id):
+    Project.query.get_or_404(project_id)
+    ## the job is given by name, so the website does not import the worker code
+    queue.enqueue("jobs.prelabel.prelabel_project", project_id, job_timeout=3600)
+    return redirect('/project/' + str(project_id))
