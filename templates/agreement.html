@@ -1,3 +1,6 @@
+{% extends "base.html" %}
+{% block content %}
+
 <h2>Agreement: {{ project.name }}</h2>
 
 <h3>Cohen's kappa</h3>
@@ -43,3 +46,5 @@
 {% endif %}
 
 <p><a href="/project/{{ project.id }}">Back to project</a></p>
+
+{% endblock %}

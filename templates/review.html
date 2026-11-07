@@ -1,3 +1,6 @@
+{% extends "base.html" %}
+{% block content %}
+
 <h2>Review queue</h2>
 
 {% if items|length == 0 %}
@@ -24,3 +27,5 @@
 {% endfor %}
 
 <p><a href="/">Back to home</a></p>
+
+{% endblock %}

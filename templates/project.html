@@ -1,3 +1,6 @@
+{% extends "base.html" %}
+{% block content %}
+
 <h2>{{ project.name }}</h2>
 
 {% if message %}
@@ -36,3 +39,5 @@
   <p><a href="/versions/{{ project.id }}"><button>Dataset versions</button></a></p>
 {% endif %}
 <p><a href="/projects">Back to projects</a></p>
+
+{% endblock %}

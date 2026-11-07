@@ -1,3 +1,6 @@
+{% extends "base.html" %}
+{% block content %}
+
 {% if task %}
   <h2>{{ project.name }}</h2>
   <p><b>Guidelines:</b> {{ project.guidelines }}</p>
@@ -53,3 +56,5 @@
 {% endif %}
 
 <p><a href="/project/{{ project.id }}">Back to project</a></p>
+
+{% endblock %}

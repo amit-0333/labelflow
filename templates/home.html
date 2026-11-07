@@ -1,20 +1,12 @@
-<h1>LabelFlow</h1>
+{% extends "base.html" %}
+{% block content %}
+  <h2>Welcome to LabelFlow</h2>
 
-{% if current_user.is_authenticated %}
-  <p>Hello {{ current_user.username }} (role: {{ current_user.role }})</p>
-
-  <p><a href="/projects">Projects</a></p>
-
-  {% if current_user.role in ["admin", "reviewer"] %}
-    <p><a href="/review">Review queue</a></p>
+  {% if current_user.is_authenticated %}
+    <p>You are logged in as <b>{{ current_user.username }}</b> ({{ current_user.role }}).</p>
+    <p><a href="/projects"><button>Go to projects</button></a></p>
+  {% else %}
+    <p>Label data together, measure quality, and export clean datasets.</p>
+    <p><a href="/login"><button>Login</button></a> <a href="/register">Create an account</a></p>
   {% endif %}
-
-  {% if current_user.role == "admin" %}
-    <p><a href="/admin/users">Manage users</a></p>
-      <p><a href="/quality">Annotator quality</a></p>
-  {% endif %}
-
-  <p><a href="/logout">Logout</a></p>
-{% else %}
-  <p><a href="/login">Login</a> | <a href="/register">Register</a></p>
-{% endif %}
+{% endblock %}

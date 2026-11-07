@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LabelFlow</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="navbar">
+    <a class="brand" href="/">LabelFlow</a>
+    {% if current_user.is_authenticated %}
+      <a href="/projects">Projects</a>
+      {% if current_user.role in ["admin", "reviewer"] %}
+        <a href="/review">Review queue</a>
+      {% endif %}
+      {% if current_user.role == "admin" %}
+        <a href="/quality">Quality</a>
+        <a href="/admin/users">Users</a>
+      {% endif %}
+      <span class="spacer"></span>
+      <span class="user">{{ current_user.username }} ({{ current_user.role }})</span>
+      <a href="/logout">Logout</a>
+    {% else %}
+      <span class="spacer"></span>
+      <a href="/login">Login</a>
+      <a href="/register">Register</a>
+    {% endif %}
+  </div>
+
+  <div class="container">
+    {% block content %}{% endblock %}
+  </div>
+</body>
+</html>
