@@ -1,41 +1,51 @@
 {% extends "base.html" %}
+{% block title %}Labeling · {{ project.name }}{% endblock %}
 {% block content %}
-
 {% if task %}
-  <h2>{{ project.name }}</h2>
-  <p><b>Guidelines:</b> {{ project.guidelines }}</p>
-  <hr>
+  {% if saved %}<div class="toast">Saved</div>{% endif %}
+
+  <p class="crumb"><a href="/project/{{ project.id }}">&larr; {{ project.name }}</a></p>
+  <div class="label-head"><span class="badge">{{ done }} labeled so far</span></div>
+
+  {% if project.guidelines %}
+    <details class="guide"><summary>Guidelines</summary><p>{{ project.guidelines }}</p></details>
+  {% endif %}
 
   {% if project.task_type == "pairwise" %}
-    <h3 style="max-width:700px">Prompt: {{ task.text }}</h3>
-    <div style="display:flex; gap:16px; max-width:900px">
-      <div style="flex:1; border:1px solid gray; padding:12px"><b>Answer A</b><p>{{ task.extra_data.answer_a }}</p></div>
-      <div style="flex:1; border:1px solid gray; padding:12px"><b>Answer B</b><p>{{ task.extra_data.answer_b }}</p></div>
+    <p class="task-prompt">Prompt</p>
+    <div class="task-text">{{ task.text }}</div>
+    <div class="answers">
+      <div class="answer-card"><b>Answer A</b><p>{{ task.extra_data.answer_a }}</p></div>
+      <div class="answer-card"><b>Answer B</b><p>{{ task.extra_data.answer_b }}</p></div>
     </div>
   {% elif project.task_type == "rating" %}
-    <h3 style="max-width:700px">Prompt: {{ task.text }}</h3>
-    <div style="border:1px solid gray; padding:12px; max-width:700px"><b>Answer</b><p>{{ task.extra_data.answer }}</p></div>
+    <p class="task-prompt">Prompt</p>
+    <div class="task-text">{{ task.text }}</div>
+    <div class="answer-card"><b>Answer</b><p>{{ task.extra_data.answer }}</p></div>
   {% else %}
-    <h3 style="max-width:700px">{{ task.text }}</h3>
+    <div class="task-text">{{ task.text }}</div>
   {% endif %}
 
   {% if prediction %}
-    <p style="color:#555">AI suggests: <b>{{ prediction.label }}</b> ({{ (prediction.confidence * 100) | round | int }}% sure)</p>
+    {% set pct = (prediction.confidence * 100) | round | int %}
+    <div class="ai-hint">
+      AI suggests: <b>{{ prediction.label }}</b> ({{ pct }}% sure)
+      <div class="conf"><div data-w="{{ pct }}"></div></div>
+    </div>
   {% endif %}
 
   <form id="label_form" action="/perform_submit_label" method="POST">
     <input type="hidden" name="task_id" value="{{ task.id }}">
     <input type="hidden" name="time_taken_ms" id="time_taken_ms">
 
-    {% for label in project.label_options %}
-      <button type="submit" name="label" value="{{ label }}" id="btn{{ loop.index }}"
-              style="padding:12px 24px; font-size:18px; margin-right:8px">
-        {{ loop.index }}: {{ label }}
-      </button>
-    {% endfor %}
+    <div class="label-buttons">
+      {% for label in project.label_options %}
+        <button type="submit" name="label" value="{{ label }}" id="btn{{ loop.index }}"><kbd>{{ loop.index }}</kbd>{{ label }}</button>
+      {% endfor %}
+    </div>
   </form>
 
-  <p style="color:gray">Tip: press the number key to choose a label.</p>
+  <p class="tip">Tip: press the number key to choose a label.</p>
 
   <script>
     var start = Date.now();
@@ -52,9 +62,10 @@
     });
   </script>
 {% else %}
-  <h2>No tasks left for you</h2>
+  <div class="empty">
+    <h3>You're all caught up</h3>
+    <p>There are no more tasks for you right now.</p>
+    <a class="btn btn-dark" href="/project/{{ project.id }}">Back to project</a>
+  </div>
 {% endif %}
-
-<p><a href="/project/{{ project.id }}">Back to project</a></p>
-
 {% endblock %}

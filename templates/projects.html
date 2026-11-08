@@ -1,27 +1,40 @@
 {% extends "base.html" %}
+{% block title %}Projects · LabelFlow{% endblock %}
 {% block content %}
+{% set type_names = {"classification": "Classification", "pairwise": "Pairwise A/B", "rating": "Rating 1-5"} %}
 
-<h2>Projects</h2>
+<div class="page-head">
+  <div>
+    <h2>Projects</h2>
+    <p class="muted">Pick a project to label, review or export.</p>
+  </div>
+  {% if current_user.role == "admin" %}
+    <a class="btn btn-dark" href="/create_project">+ New project</a>
+  {% endif %}
+</div>
 
-{% if current_user.role == "admin" %}
-  <p><a href="/create_project">+ Create new project</a></p>
+{% if items|length == 0 %}
+  <div class="empty">
+    <h3>No projects yet</h3>
+    <p>Create a project, upload a CSV, and start labeling.</p>
+    {% if current_user.role == "admin" %}
+      <a class="btn btn-dark" href="/create_project">Create your first project</a>
+    {% endif %}
+  </div>
+{% else %}
+  <div class="project-grid">
+    {% for it in items %}
+      <a class="project-card" href="/project/{{ it.project.id }}">
+        <span class="badge badge-{{ it.project.task_type }}">{{ type_names.get(it.project.task_type, it.project.task_type) }}</span>
+        <h3>{{ it.project.name }}</h3>
+        <p class="muted">{{ it.project.description or "No description" }}</p>
+          <div class="progress"><div data-w="{{ it.c.percent }}"></div></div>
+        <div class="pc-meta">
+          <span>{{ it.c.completed }} / {{ it.c.total }} done</span>
+          <span>{{ it.project.annotators_per_item }} per item</span>
+        </div>
+      </a>
+    {% endfor %}
+  </div>
 {% endif %}
-
-<table border="1" cellpadding="6">
-  <tr>
-    <th>Name</th>
-    <th>Labels</th>
-    <th>Annotators per item</th>
-  </tr>
-  {% for p in projects %}
-  <tr>
-    <td><a href="/project/{{ p.id }}">{{ p.name }}</a></td>
-    <td>{{ p.label_options | join(", ") }}</td>
-    <td>{{ p.annotators_per_item }}</td>
-  </tr>
-  {% endfor %}
-</table>
-
-<p><a href="/">Back to home</a></p>
-
 {% endblock %}

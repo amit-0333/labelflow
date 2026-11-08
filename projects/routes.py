@@ -1,21 +1,51 @@
 from flask import Blueprint, render_template, request, redirect
 from flask_login import current_user
 from core.db import db
-from core.models import Project, Task
+from core.models import Project, Task, AIPrediction
 from auth.decorators import role_required
 from projects.csv_parser import parse_csv
-from core.models import AIPrediction
 from jobs.queue import queue
 
 projects_bp = Blueprint("projects", __name__)
 
 
-## show all projects (any logged in user can see the list)
+## numbers shown on project cards and the project page
+def get_counts(project_id):
+    tasks = Task.query.filter_by(project_id=project_id, is_gold=False).all()
+    total = len(tasks)
+    completed = sum(1 for t in tasks if t.status == "completed")
+    needs_review = sum(1 for t in tasks if t.status == "needs_review")
+    ai_count = (
+        AIPrediction.query
+        .join(Task, AIPrediction.task_id == Task.id)
+        .filter(Task.project_id == project_id)
+        .count()
+    )
+    gold_count = Task.query.filter_by(project_id=project_id, is_gold=True).count()
+    percent = round(completed / total * 100) if total else 0
+    return {
+        "total": total,
+        "completed": completed,
+        "needs_review": needs_review,
+        "ai_count": ai_count,
+        "gold_count": gold_count,
+        "percent": percent,
+    }
+
+
+## show the project page with a message
+def show_project(project, message=None):
+    return render_template('project.html', project=project, c=get_counts(project.id), message=message)
+
+
+## show all projects as cards
 @projects_bp.route('/projects')
 @role_required("admin", "annotator", "reviewer")
 def projects():
-    all_projects = Project.query.all()
-    return render_template('projects.html', projects=all_projects)
+    items = []
+    for p in Project.query.order_by(Project.id.desc()).all():
+        items.append({"project": p, "c": get_counts(p.id)})
+    return render_template('projects.html', items=items)
 
 
 ## admin only: show the create project page
@@ -66,18 +96,15 @@ def perform_create_project():
     return redirect('/projects')
 
 
+## show one project
 @projects_bp.route('/project/<int:project_id>')
 @role_required("admin", "annotator", "reviewer")
 def project_page(project_id):
     project = Project.query.get_or_404(project_id)
-    task_count = Task.query.filter_by(project_id=project_id).count()
-    ai_count = (
-        AIPrediction.query
-        .join(Task, AIPrediction.task_id == Task.id)
-        .filter(Task.project_id == project_id)
-        .count()
-    )
-    return render_template('project.html', project=project, task_count=task_count, ai_count=ai_count)
+    message = None
+    if request.args.get('queued'):
+        message = "AI pre-labeling started. Refresh in a few seconds to see the count."
+    return show_project(project, message)
 
 
 ## admin only: read the CSV and save each row as a task
@@ -87,42 +114,35 @@ def perform_upload_csv(project_id):
     project = Project.query.get_or_404(project_id)
     file = request.files.get('file')
 
-    ## no file chosen
     if file is None or file.filename == '':
-        task_count = Task.query.filter_by(project_id=project_id).count()
-        return render_template('project.html', project=project, task_count=task_count, message="Choose a CSV file first")
+        return show_project(project, "Choose a CSV file first")
 
     tasks, error = parse_csv(file, project.task_type)
-
     if error:
-        task_count = Task.query.filter_by(project_id=project_id).count()
-        return render_template('project.html', project=project, task_count=task_count, message=error)
+        return show_project(project, error)
 
-        ## a gold_label must be one of the project labels
+    ## a gold_label must be one of the project labels
     for t in tasks:
         if t["gold_label"] and t["gold_label"] not in project.label_options:
-            task_count = Task.query.filter_by(project_id=project_id).count()
-            return render_template('project.html', project=project, task_count=task_count, message="gold_label '" + t["gold_label"] + "' is not one of the project labels")
+            return show_project(project, "gold_label '" + t["gold_label"] + "' is not one of the project labels")
 
     for t in tasks:
-        task = Task(
+        db.session.add(Task(
             project_id=project_id,
             text=t["text"],
             extra_data=t["extra"],
             is_gold=bool(t["gold_label"]),
             gold_label=t["gold_label"]
-        )
-        db.session.add(task)
+        ))
     db.session.commit()
 
-    task_count = Task.query.filter_by(project_id=project_id).count()
-    return render_template('project.html', project=project, task_count=task_count, message=str(len(tasks)) + " tasks uploaded")
+    return show_project(project, str(len(tasks)) + " tasks uploaded")
+
 
 ## admin only: send the pre-labeling job to the worker
 @projects_bp.route('/perform_prelabel/<int:project_id>')
 @role_required("admin")
 def perform_prelabel(project_id):
     Project.query.get_or_404(project_id)
-    ## the job is given by name, so the website does not import the worker code
     queue.enqueue("jobs.prelabel.prelabel_project", project_id, job_timeout=3600)
-    return redirect('/project/' + str(project_id))
+    return redirect('/project/' + str(project_id) + '?queued=1')

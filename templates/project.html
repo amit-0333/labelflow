@@ -1,43 +1,70 @@
 {% extends "base.html" %}
+{% block title %}{{ project.name }} · LabelFlow{% endblock %}
 {% block content %}
+{% set type_names = {"classification": "Classification", "pairwise": "Pairwise A/B", "rating": "Rating 1-5"} %}
 
-<h2>{{ project.name }}</h2>
+<p class="crumb"><a href="/projects">&larr; Projects</a></p>
 
-{% if message %}
-  <p style="color:green">{{ message }}</p>
+<div class="page-head">
+  <div>
+    <span class="badge badge-{{ project.task_type }}">{{ type_names.get(project.task_type, project.task_type) }}</span>
+    <h2>{{ project.name }}</h2>
+    {% if project.description %}<p class="muted">{{ project.description }}</p>{% endif %}
+  </div>
+  {% if current_user.role in ["admin", "annotator"] %}
+    <a class="btn btn-dark" href="/start_labeling/{{ project.id }}">Start labeling</a>
+  {% endif %}
+</div>
+
+{% if message %}<div class="notice">{{ message }}</div>{% endif %}
+
+<div class="stats">
+  <div class="stat-tile"><span>Tasks</span><b>{{ c.total }}</b></div>
+  <div class="stat-tile"><span>Completed</span><b>{{ c.completed }}</b></div>
+  <div class="stat-tile"><span>Needs review</span><b>{{ c.needs_review }}</b></div>
+  <div class="stat-tile"><span>AI pre-labeled</span><b>{{ c.ai_count }}</b></div>
+</div>
+<div class="progress big"><div data-w="{{ c.percent }}"></div></div>
+<p class="muted small" style="margin-top:8px">{{ c.percent }}% complete &middot; labels: {{ project.label_options | join(", ") }} &middot; {{ project.annotators_per_item }} annotators per item &middot; {{ c.gold_count }} gold questions</p>
+
+{% if project.guidelines %}
+  <div class="panel"><h3>Guidelines</h3><p>{{ project.guidelines }}</p></div>
 {% endif %}
 
-<p><b>Description:</b> {{ project.description }}</p>
-<p><b>Guidelines:</b> {{ project.guidelines }}</p>
-<p><b>Type:</b> {{ project.task_type }}</p>
-<p><b>Labels:</b> {{ project.label_options | join(", ") }}</p>
-<p><b>Annotators per item:</b> {{ project.annotators_per_item }}</p>
-<p><b>Total tasks:</b> {{ task_count }}</p>
-<p><b>AI pre-labeled:</b> {{ ai_count }}</p>
+<div class="actions">
+  {% if current_user.role == "admin" %}
+    <div class="action-card">
+      <h3>Data and AI</h3>
+      <p class="muted">CSV columns: <b>{% if project.task_type == "pairwise" %}prompt, answer_a, answer_b{% elif project.task_type == "rating" %}prompt, answer{% else %}text{% endif %}</b>. Add <b>gold_label</b> for hidden test questions.</p>
+      <form action="/perform_upload_csv/{{ project.id }}" method="POST" enctype="multipart/form-data">
+        <input type="file" name="file" accept=".csv">
+        <button type="submit">Upload CSV</button>
+      </form>
+      <div class="row">
+        <a class="btn btn-light" href="/perform_prelabel/{{ project.id }}" onclick="this.textContent='Starting...'">Run AI pre-labeling</a>
+      </div>
+    </div>
+  {% endif %}
 
-{% if current_user.role == "admin" %}
-  <h3>Upload CSV</h3>
-  <p>The file must have columns: <b>{% if project.task_type == "pairwise" %}prompt, answer_a, answer_b{% elif project.task_type == "rating" %}prompt, answer{% else %}text{% endif %}</b></p>
-  <form action="/perform_upload_csv/{{ project.id }}" method="POST" enctype="multipart/form-data">
-    <input type="file" name="file" accept=".csv">
-    <button type="submit">Upload</button>
-  </form>
+  {% if current_user.role in ["admin", "reviewer"] %}
+    <div class="action-card">
+      <h3>Export</h3>
+      <p class="muted">Download final labels or freeze a version.</p>
+      <div class="row">
+        <a class="btn btn-light" href="/export/{{ project.id }}/csv">CSV</a>
+        <a class="btn btn-light" href="/export/{{ project.id }}/jsonl">JSONL</a>
+        <a class="btn btn-light" href="/versions/{{ project.id }}">Versions</a>
+      </div>
+    </div>
 
-  <p><a href="/perform_prelabel/{{ project.id }}"><button>Run AI pre-labeling</button></a></p>
-{% endif %}
-{% if current_user.role in ["admin", "annotator"] %}
-  <p><a href="/start_labeling/{{ project.id }}"><button>Start labeling</button></a></p>
-{% endif %}
-{% if current_user.role in ["admin", "reviewer"] %}
-  <h3>Export final labels</h3>
-  <p>
-    <a href="/export/{{ project.id }}/csv"><button>Download CSV</button></a>
-    <a href="/export/{{ project.id }}/jsonl"><button>Download JSONL</button></a>
-  </p>
-  <p><a href="/dashboard/{{ project.id }}"><button>Dashboard</button></a></p>
-  <p><a href="/agreement/{{ project.id }}"><button>Agreement dashboard</button></a></p>
-  <p><a href="/versions/{{ project.id }}"><button>Dataset versions</button></a></p>
-{% endif %}
-<p><a href="/projects">Back to projects</a></p>
-
+    <div class="action-card">
+      <h3>Analytics</h3>
+      <p class="muted">Quality, agreement and AI numbers.</p>
+      <div class="row">
+        <a class="btn btn-light" href="/dashboard/{{ project.id }}">Dashboard</a>
+        <a class="btn btn-light" href="/agreement/{{ project.id }}">Agreement</a>
+      </div>
+    </div>
+  {% endif %}
+</div>
 {% endblock %}

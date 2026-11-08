@@ -3,7 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>LabelFlow</title>
+  <title>{% block title %}LabelFlow{% endblock %}</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230a0a0a'/%3E%3Cpath d='M28 52l16 16 30-34' stroke='white' stroke-width='11' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -24,7 +25,7 @@
         <a href="/admin/users">Users</a>
       {% endif %}
       <span class="spacer"></span>
-      <span class="user">{{ current_user.username }} &middot; {{ current_user.role }}</span>
+      <span class="user">{% if current_user.username != current_user.role %}{{ current_user.username }} {% endif %}<span class="badge">{{ current_user.role }}</span></span>
       <a href="/logout">Logout</a>
     {% else %}
       <span class="spacer"></span>
@@ -36,5 +37,7 @@
   <main class="container">
     {% block content %}{% endblock %}
   </main>
+
+  <footer class="footer">LabelFlow &middot; <a href="https://github.com/amit-0333/labelflow">GitHub</a></footer>
 </body>
 </html>
