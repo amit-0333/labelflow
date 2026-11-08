@@ -1,0 +1,60 @@
+services:
+  db:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-labelflow}
+      MYSQL_DATABASE: labelflow
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  web:
+    build: .
+    env_file: .env
+    environment:
+      DATABASE_URL: mysql://root:${MYSQL_ROOT_PASSWORD:-labelflow}@db:3306/labelflow
+      REDIS_URL: redis://redis:6379/0
+      APP_ENV: development
+    ports:
+      - "5000:5000"
+    restart: on-failure
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+
+  worker:
+    build: .
+    command: rq worker --url redis://redis:6379/0 --path .
+    env_file: .env
+    environment:
+      DATABASE_URL: mysql://root:${MYSQL_ROOT_PASSWORD:-labelflow}@db:3306/labelflow
+      REDIS_URL: redis://redis:6379/0
+      APP_ENV: development
+    restart: on-failure
+    depends_on:
+      web:
+        condition: service_healthy
+
+volumes:
+  db_data:
