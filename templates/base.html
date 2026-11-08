@@ -4,11 +4,16 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>LabelFlow</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+  {% include "_icons.html" %}
+
   <div class="navbar">
-    <a class="brand" href="/">LabelFlow</a>
+    <a class="brand" href="/"><span class="logo">&#10003;</span>LabelFlow</a>
     {% if current_user.is_authenticated %}
       <a href="/projects">Projects</a>
       {% if current_user.role in ["admin", "reviewer"] %}
@@ -19,17 +24,17 @@
         <a href="/admin/users">Users</a>
       {% endif %}
       <span class="spacer"></span>
-      <span class="user">{{ current_user.username }} ({{ current_user.role }})</span>
+      <span class="user">{{ current_user.username }} &middot; {{ current_user.role }}</span>
       <a href="/logout">Logout</a>
     {% else %}
       <span class="spacer"></span>
-      <a href="/login">Login</a>
-      <a href="/register">Register</a>
+      <a href="/login">Log in</a>
+      <a class="nav-btn" href="/register">Create account</a>
     {% endif %}
   </div>
 
-  <div class="container">
+  <main class="container">
     {% block content %}{% endblock %}
-  </div>
+  </main>
 </body>
 </html>

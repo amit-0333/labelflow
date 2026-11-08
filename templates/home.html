@@ -1,12 +1,32 @@
 {% extends "base.html" %}
 {% block content %}
-  <h2>Welcome to LabelFlow</h2>
+  <div class="hero">
+    <span class="tag-pill">LLM pre-labeling &middot; quality analytics</span>
+    <h1>Label data together.<br>Trust every label.</h1>
+    <p>Upload raw data, let your team label it with an LLM's help, and export a clean, versioned dataset with quality numbers.</p>
+    <div class="cta">
+      {% if current_user.is_authenticated %}
+        <a href="/projects"><button>Go to projects</button></a>
+      {% else %}
+        <a href="/register"><button>Get started</button></a>
+        <a class="btn-light" href="#how">See how it works</a>
+      {% endif %}
+    </div>
+  </div>
 
-  {% if current_user.is_authenticated %}
-    <p>You are logged in as <b>{{ current_user.username }}</b> ({{ current_user.role }}).</p>
-    <p><a href="/projects"><button>Go to projects</button></a></p>
-  {% else %}
-    <p>Label data together, measure quality, and export clean datasets.</p>
-    <p><a href="/login"><button>Login</button></a> <a href="/register">Create an account</a></p>
-  {% endif %}
+  <div class="features">
+    <div class="feature"><h3>LLM pre-labeling</h3><p>Groq suggests a label and a confidence. Annotators confirm or fix it.</p></div>
+    <div class="feature"><h3>Safe teamwork</h3><p>Many annotators at once, and no task is ever double-claimed.</p></div>
+    <div class="feature"><h3>Gold questions</h3><p>Hidden test questions and speed checks catch careless labels.</p></div>
+    <div class="feature"><h3>Agreement metrics</h3><p>Cohen's kappa and the most confused labels.</p></div>
+    <div class="feature"><h3>Versioned exports</h3><p>Freeze v1, v2, v3 and download CSV or JSONL.</p></div>
+    <div class="feature"><h3>LLM evaluation</h3><p>Pairwise A/B comparison and 1 to 5 rating tasks.</p></div>
+  </div>
+
+  <h3 id="how" style="margin-top:64px">How it works</h3>
+  <div class="steps">
+    <div class="step"><div class="num">1</div><h3>Upload a CSV</h3><p>Each row becomes a task in your project.</p></div>
+    <div class="step"><div class="num">2</div><h3>Label with AI help</h3><p>The LLM suggests, your team confirms or corrects.</p></div>
+    <div class="step"><div class="num">3</div><h3>Review and export</h3><p>Disagreements go to a reviewer. Export a versioned dataset.</p></div>
+  </div>
 {% endblock %}

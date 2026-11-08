@@ -1,19 +1,22 @@
 {% extends "base.html" %}
 {% block content %}
+<div class="auth-wrap">
+  <div class="auth-card">
+    <h2>Create your account</h2>
+    <p class="sub">Join a project and start labeling.</p>
 
-<h2>Register</h2>
+    {% if message %}
+      <div class="alert">{{ message }}</div>
+    {% endif %}
 
-{% if message %}
-  <p style="color:red">{{ message }}</p>
-{% endif %}
+    <form action="/perform_registration" method="POST">
+      <label>Username<input name="username" required autofocus></label>
+      <label>Email<input name="email" type="email" required></label>
+      <label>Password<input name="password" type="password" required></label>
+      <button type="submit" class="full">Create account</button>
+    </form>
 
-<form action="/perform_registration" method="POST">
-  <p>Username: <input name="username" required></p>
-  <p>Email: <input name="email" type="email" required></p>
-  <p>Password: <input name="password" type="password" required></p>
-  <button type="submit">Register</button>
-</form>
-
-<p><a href="/login">Already have an account? Login</a></p>
-
+    <p class="alt">Already have an account? <a href="/login">Log in</a></p>
+  </div>
+</div>
 {% endblock %}
