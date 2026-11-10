@@ -210,7 +210,7 @@ How to read these honestly:
 | Time per label, with vs without AI | Dashboard, per-annotator AI switch | _pending_ |
 | Bad labels caught by quality checks | Wrong gold answers plus too-fast labels | _pending_ |
 
-These cells will be filled with measured values, not estimates.
+These cells will be filled with measured values, not estimates. Every formula, the protocol and the limitations of the study are in [`docs/EXPERIMENT.md`](docs/EXPERIMENT.md).
 
 ## Project structure
 
@@ -243,6 +243,7 @@ Each module has one job. `quality/agreement.py` knows nothing about Flask, and `
 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Architecture, request flows, data model, every route, what each file does |
 | [`docs/RUN_GUIDE.md`](docs/RUN_GUIDE.md) | Start and stop with Docker or in local mode, and a troubleshooting table |
 | [`docs/DEVELOPMENT_JOURNEY.md`](docs/DEVELOPMENT_JOURNEY.md) | How it was built phase by phase, with the problems hit and fixed |
+| [`docs/EXPERIMENT.md`](docs/EXPERIMENT.md) | How every metric is computed, the study protocol and its limitations |
 
 ## Known limitations
 
